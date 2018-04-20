@@ -8,7 +8,7 @@ module.exports = function (file, api, options) {
   };
   const j = api.jscodeshift;
   const ReactUtils = require('./ReactUtils')(j);
-  const path = j(file.source);
+  let path = j(file.source);
 
 
   const findStatelessComponent = (j, path) => {
@@ -43,23 +43,16 @@ module.exports = function (file, api, options) {
 
   }
 
-  function classComponent(p) {
-    const decl = p.value.declarations[0];
-    if (decl.init.type !== 'ArrowFunctionExpression' ||
-      (!hasJSXElement(decl.init.body) && decl.init.body.type !== "JSXElement")) {
-      return p.value;
+  function toClassComponent(classNameIdentifier, decl) {
+    if (decl.type !== 'ArrowFunctionExpression' ||
+      (!hasJSXElement(decl.body) && decl.body.type !== "JSXElement")) {
+      return false;
     }
 
-    const className = decl.id;
-    const body = convertComponentBody(decl.init.body);
-
-
-    // return statement`class ${decl.id} extends Component {
-    //  render() { ${body} }
-    // }`;
+    const body = convertComponentBody(decl.body);
 
     return j.classDeclaration(
-      className,
+      classNameIdentifier,
       j.classBody([
         j.methodDefinition('method',
           j.identifier('render'),
@@ -69,9 +62,14 @@ module.exports = function (file, api, options) {
     );
   }
 
-  return path
+  path
+    .find(j.ExportDefaultDeclaration)
+    .replaceWith(p => j.exportDefaultDeclaration(toClassComponent(null, p.value.declaration) || p.value));
+
+  path
     .find(j.VariableDeclaration)
     .filter(p => p.value.declarations.length === 1)
-    .replaceWith(classComponent)
-    .toSource(printOptions);
+    .replaceWith(p => toClassComponent(p.value.declarations[0].id, p.value.declarations[0].init) || p.value);
+
+  return path.toSource(printOptions);
 };

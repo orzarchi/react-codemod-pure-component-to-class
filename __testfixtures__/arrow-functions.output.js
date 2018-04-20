@@ -6,6 +6,12 @@ export default class extends React.Component {
   }
 }
 
+class Foo extends React.Component {
+  render() {
+    return <div>foo</div>;
+  }
+}
+
 class Item extends React.Component {
   render() {
     const {
@@ -16,8 +22,14 @@ class Item extends React.Component {
   }
 }
 
-class X extends React.Component {
+class Item2 extends React.Component {
   render() {
-    return <div>foo</div>;
+    const {
+      item
+    } = this.props;
+
+    return <li>{item}</li>;
   }
 }
+
+
