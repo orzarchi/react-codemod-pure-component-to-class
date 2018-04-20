@@ -7,60 +7,87 @@ module.exports = function (file, api, options) {
     trailingComma: true,
   };
   const j = api.jscodeshift;
-  const ReactUtils = require('./ReactUtils')(j);
-  let path = j(file.source);
 
-
-  const findStatelessComponent = (j, path) => {
-    return path.find(j.ExportDefaultDeclaration).declaration;
-  };
-
-  function getReactComponentNameSpecifier(path, parentClassName = 'Component') {
-    const componentImport = ReactUtils.findReactComponentNameByParent(path, parentClassName);
-
-    return componentImport
-      ? j.identifier(componentImport)
-      : j.memberExpression(
-        j.identifier('React'),
-        j.identifier(parentClassName),
-        false
-      )
-  }
-
-  function convertComponentBody(body) {
-    body = body.type === "JSXElement" ? [j.returnStatement(body)] : body.body;
-    body = body.type === "BlockStatement" ? body : j.blockStatement(body);
+  function createComponentBody(body) {
+    body = j.BlockStatement.check(body)
+      ? body
+      : j.blockStatement([j.returnStatement(body)]);
 
     j(body)
       .find(j.Identifier, {name: 'props'})
-      .replaceWith(p => j.memberExpression(j.thisExpression(), j.identifier('props')));
+      .replaceWith(() => j.memberExpression(j.thisExpression(), j.identifier('props')));
+
+
     return body;
   }
 
+  const createPropsDecl = param => {
+    if (!j.ObjectPattern.check(param) && param.name === 'props') {
+      return null;
+    }
+
+    return j.variableDeclaration('const', [
+      j.variableDeclarator(
+        param,
+        j.memberExpression(j.thisExpression(), j.identifier('props'))
+      ),
+    ]);
+  };
+
+  const areValidArguments = args => {
+    const hasOneArgumentMax = args.length <= 1;
+    const argumentIsIdentifierOrObjectPattern =
+      !args[0] || j.Identifier.check(args[0]) || j.ObjectPattern.check(args[0]);
+
+    return hasOneArgumentMax && argumentIsIdentifierOrObjectPattern;
+  };
 
   function hasJSXElement(ast) {
     return j(ast).find(j.JSXElement).size() > 0;
 
   }
 
-  function toClassComponent(classNameIdentifier, decl) {
-    if (decl.type !== 'ArrowFunctionExpression' ||
-      (!hasJSXElement(decl.body) && decl.body.type !== "JSXElement")) {
-      return false;
+  const canBeReplaced = path => {
+    const isFunc = [
+      j.FunctionDeclaration,
+      j.FunctionExpression,
+      j.ArrowFunctionExpression
+    ].some(x => x.check(path));
+    const isJSX = hasJSXElement(path) || j.JSXElement.check(path);
+    return isFunc && areValidArguments(path.params) && isJSX;
+  };
+
+  function toClassComponent(name, p) {
+    if (!canBeReplaced(p)){
+      return;
     }
 
-    const body = convertComponentBody(decl.body);
+    const param = p.params[0];
+    const body = createComponentBody(p.body);
+
+    if (param) {
+      const propsDecl = createPropsDecl(param);
+      if (propsDecl) {
+        body.body.unshift(createPropsDecl(param));
+      }
+    }
 
     return j.classDeclaration(
-      classNameIdentifier,
+      name,
       j.classBody([
         j.methodDefinition('method',
           j.identifier('render'),
           j.functionExpression(null, [], body))
       ]),
-      getReactComponentNameSpecifier(path)
+      j.memberExpression(
+        j.identifier('React'),
+        j.identifier('Component'),
+        false
+      )
     );
   }
+
+  const path = j(file.source);
 
   path
     .find(j.ExportDefaultDeclaration)
