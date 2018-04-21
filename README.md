@@ -5,6 +5,15 @@ A react [codemod](https://github.com/reactjs/react-codemod/) to transform statel
 Based on:
 * [react-pure-to-class](https://github.com/angryobject/react-pure-to-class)
 * [js-transforms](https://github.com/jhgg/js-transforms/blob/master/pure-to-composite-component.js)
+
+### Usage:
+`npm install react-codemod-pure-component-to-class`
+`npm install -g jscodeshift`
+```
+// Run using IDE command or via CLI
+jscodeshift -t node_modules/react-codemod-pure-component-to-class/pure-component-to-class.js components/TestComponent.jsx
+```
+
 ### Examples:
 
 ##### Before:
