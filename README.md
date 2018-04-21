@@ -1,4 +1,6 @@
-## Pure Component To class
+# Pure Component To class
+[![npm version](https://badge.fury.io/js/pure-component-to-class.svg)](https://badge.fury.io/js/pure-component-to-class)
+
 
 A react [codemod](https://github.com/reactjs/react-codemod/) to transform stateless/pure/functional components to class components.
 

@@ -1,18 +1,22 @@
 {
-  "name": "react-codemod-pure-component-to-class",
+  "name": "pure-component-to-class",
   "version": "1.0.0",
-  "description": "",
+  "description": "A react codemod to transform stateless/pure/functional components to class components.",
   "main": "index.js",
   "scripts": {
     "test": "jest",
     "test:debug": "node $NODE_DEBUG_OPTION node_modules/.bin/jest --runInBand"
   },
-  "author": "",
+  "author": "Or Zarchi",
   "license": "MIT",
   "optionalDependencies": {
     "jscodeshift": "^0.5.0"
   },
   "devDependencies": {
     "jest": "^22.4.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/orzarchi/node-microioc.git"
   }
 }
