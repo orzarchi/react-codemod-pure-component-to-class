@@ -1,6 +1,6 @@
 {
   "name": "pure-component-to-class",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A react codemod to transform stateless/pure/functional components to class components.",
   "main": "index.js",
   "scripts": {

@@ -10,7 +10,7 @@ Based on:
 
 ### Usage:
 ```
-npm install react-codemod-pure-component-to-class
+npm install pure-component-to-class
 npm install -g jscodeshift
 
 // Run using IDE command or via CLI
