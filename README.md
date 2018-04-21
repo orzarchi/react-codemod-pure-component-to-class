@@ -9,11 +9,12 @@ Based on:
 * [js-transforms](https://github.com/jhgg/js-transforms/blob/master/pure-to-composite-component.js)
 
 ### Usage:
-`npm install react-codemod-pure-component-to-class`
-`npm install -g jscodeshift`
 ```
+npm install react-codemod-pure-component-to-class
+npm install -g jscodeshift
+
 // Run using IDE command or via CLI
-jscodeshift -t node_modules/react-codemod-pure-component-to-class/pure-component-to-class.js components/TestComponent.jsx
+jscodeshift -t node_modules/pure-component-to-class/pure-component-to-class.js components/TestComponent.jsx
 ```
 
 ### Examples:
